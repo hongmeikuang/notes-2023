@@ -1,0 +1,60 @@
+# A4checklist操作命令
+
+## check GPIO
+
+```
+uboot : gpio set/clear GPIOX_x 
+可以观察到现象就操作 LED的 gpio，将LED的gpio  set/clear 就可以看见灯的亮灭。
+
+kernel:
+要先挂载，然后在cat
+
+mount -t debugfs none /sys/kernel/debug
+cat /sys/kernel/debug/gpio
+cat /sys/kernel/debug/pinctrl/pinctrl@xxxxxxxx/pinmux-pins
+```
+
+## IR remote -- 遥控操作
+
+应用层的遥控实现是在audioservice里实现的。但是bring up 阶段，没有audioservice。
+
+此时检查的方法有两种：
+
+1. 用evtest 工具。
+
+将evtest 文件放在 根目录下，然后./evtest --help 查看用法
+
+```
+evtest [--grab] /dev/input/eventX
+```
+
+要先查看ir remote 是event几
+
+```
+cat /proc/bus/input/devices
+```
+
+是event0。
+
+然后使用命令   `./evtest  /dev/input/event0`
+
+然后按下按键，串口有打印出现就是ok的。
+
+2. 先用板子上的power 按键让系统进入 suspend 状态，然后用遥控器的power键，看能不能唤醒，如果能够唤醒就是ok的。
+
+## 查看pdm 寄存器的基地址。
+
+看了一圈没在数据手册上找到，在kernel代码里的`meson-a5-dtsi`中的`aml_snd_iomap`找到了对应的pdm_bus即pdm的基地址 0xFE331000。读写操作如下：在录音的时候输入：
+
+```
+mount -t debugfs none /sys/kernel/debug
+#将该地址挂载
+echo 0xFE331000 > /sys/kernel/debug/aml_reg/paddr
+#读该地址对应的值
+cat /sys/kernel/debug/aml_reg/paddr
+#向该地址写入值
+echo 0xFE331000 0x23123123 > /sys/kernel/debug/aml_reg/paddr
+```
+
+
+
