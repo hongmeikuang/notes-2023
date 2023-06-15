@@ -26,13 +26,17 @@ ps -fe|grep SampleApp |grep -v grep 1>/dev/null 2>&1
 
 ## 一些命令
 
+追踪该文件的尾部，会一直打印出末尾几行数据
+
+```
+tail -f tmp/sbr_info.txt
+```
+
 测试能不能ping通外网的命令
 
 ```
 wget www.google.com
 ```
-
-
 
 ```
 i2cdump -f -y 2 0x40  板端查看版本号
@@ -110,7 +114,20 @@ wifi的账号密码写进去。这样就不用再板端再配一次了。
 
 tar -xvf code.tar.bz2
 
+## Linux设备连接外网设置步骤
 
+设别连接网络前执行以下命令
+
+```
+export http_proxy="192.168.137.1:7890"
+export https_proxy="192.168.137.1:7890"
+```
+
+连接的网络是当前PC设置了代理的网络。
+
+## 烧录efuse 
+
+烧录efuse 找林智宇
 
 ## vscode 初始主题设置
 
@@ -128,3 +145,4 @@ tar -xvf code.tar.bz2
     "window.commandCenter": true
 }
 ```
+
