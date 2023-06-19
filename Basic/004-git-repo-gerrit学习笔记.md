@@ -1,15 +1,15 @@
 # git/repo/gerrit
 
-# 一、git 
+# git 
 
 Git是一个开源的分布式版本控制系统，用以有效、高速的处理从很小到非常大的项目版本管理。
 
-## 1.1git 命令
+## git 命令
 
 git 是分布式版本控制系统；分为
 
     1、本地仓库：开发人员自己电脑上的Git仓库
-
+    
     2、远程仓库：远程服务器上的Git仓库
 
 clone：克隆，将远程仓库复制到本地
@@ -61,7 +61,7 @@ git pull amlogic master 拉去主分支
 
 git cherry-pick commitid 把刚才你做好的改动拿到当前这个分支来。
 
-## 1.2工作中修改代码提交步骤
+## 工作中修改代码提交步骤
 1、在buildroot_upload 目录下，保证分支正确
 
 2、通过git branch -a，找到remotes/m/master对应的分支
@@ -88,9 +88,41 @@ git push review HEAD:refs/for/master
 10、然后把提交后的url发送给hanliang.xiong和peipeng.zhao,发送时，对自己修改的内容进行简单的描述
 
 
-## 1.3缺少commit msg 
+## 缺少commit msg 
 
 拷贝~/work/a113x2/code2/buildroot/.git/hooks/目录下的commit msg 到当前目录下的.git/hooks/目录
+
+## git add代码之后需要切换分支提交的方法
+
+在原来的分支已执行以下操作
+
+```
+git add .
+git commit -s
+```
+
+但发现需要push代码的并不是这个分支，可以进行如下操作简便
+
+先在当前分支
+
+```
+git format-patch HEAD~1
+```
+
+然后切换到正确的分支
+
+```
+git checkout master
+git am 0001-buildroot-Remove-the-libplayer.-1-1.patch
+```
+
+最后执行
+
+```
+git push review HEAD:refs/for/master
+```
+
+以上便可以将代码快捷纠正push到正确的分支。
 
 # 二、repo 
 
@@ -120,6 +152,7 @@ manifest.xml 是用 git 管理起来的，在这里 -b branchname 就是指的 m
 
 - -m :指定所需要的manifests库中的清单文件。默认情况下，会使用maniftests/default.xml
   
+
 初始化的时候，repo 会在当前目录下面建立一个 .repo 目录，然后把刚才提到的从网上下载下来的所有文件都放在这个目录里面。
 
 ```

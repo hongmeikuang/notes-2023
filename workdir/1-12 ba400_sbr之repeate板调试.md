@@ -53,7 +53,15 @@ cat sys/kernel/debug/pinctrl/fe330000.audiobus\:pinctrl-pinctrl-audio/pinmux-pin
 
 将打印的信息与dts 中配置的信息，进行核对，看是否符合预期，检查是否是引脚被别的模块占用了。
 
+# asplay 切换到SPDIF的时候有杂音
 
+现象：当asplay 切换到SPDIF的时候有杂音，或者是切换到spdif模式然后重启的时候，会有杂音。
+
+后来开机不启动audioservice后，然后对spdif进行录音，发现喇叭会出很大的杂音。
+
+到硬件吴亚涛处用示波器测量，发现频率异常。
+
+代码提交在这：https://scgit.amlogic.com/#/c/329803/
 
 ---
 
