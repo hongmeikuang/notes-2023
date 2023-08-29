@@ -34,12 +34,16 @@ AMLA113X2AV400001       device
 ### 在AV400 上通过串口单独测试特定模块
 ```
 ./aats_linux_cmd -p A113X2_AV400_a6432bit_DailyBuild.yml -t Swupdate_Test -s /dev/AV400_connector -d AMLA113X2AV400001 -U 921600
+
+
+./aats_linux_cmd -p A113L2_BA400_a6432bit_DailyBuild.yml -t Suspend_Resume -s /dev/BA400_connector -d AMLA113L2BA400001 -U 921600
 ```
 ### 在每个命令中需要加上-U 921600 设置波特率，否则会乱码，导致测试结果失败
 
 ### 查看串口打印信息
 ```
 minicom -D /dev/AV400_connector -b 921600 
+minicom -D /dev/BA400_connector -b 921600 
 
 echo none > /sys/kernel/config/usb_gadget/amlogic/UDC
 echo fdd00000.crgudc2 > /sys/kernel/config/usb_gadget/amlogic/UDC
@@ -51,9 +55,13 @@ echo fdd00000.crgudc2 > /sys/kernel/config/usb_gadget/amlogic/UDC
 
 
 /home/amlogic/workdir/workspace/Autotest/AV400/Linux_Daily_SZ_01/AutoFramework/bin/update/adnl_burn_pkg -t 20 -p /home/amlogic/workdir/workspace/Autotest/AV400/Linux_Daily_SZ_01/AutoFramework/image/aml_upgrade_package.img
+
+
+/home/amlogic/workdir/workspace/Autotest/BA400/Linux_Daily_SZ_01/AutoFramework/bin/setDutInUpdateMode /dev/BA400_connector 921600 /dev/BA400_powerRelay /home/amlogic/workdir/workspace/Autotest/BA400/Linux_Daily_SZ_01/AutoFramework adnl
+
+
+/home/amlogic/workdir/workspace/Autotest/BA400/Linux_Daily_SZ_01/AutoFramework/bin/update/adnl_burn_pkg -t 20 -p /home/amlogic/workdir/workspace/Autotest/BA400/Linux_Daily_SZ_01/AutoFramework/image/aml_upgrade_package.img
 ```
-
-
 
 
 

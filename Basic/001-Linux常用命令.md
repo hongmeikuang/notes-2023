@@ -125,6 +125,14 @@ export https_proxy="192.168.137.1:7890"
 
 连接的网络是当前PC设置了代理的网络。
 
+关闭代理的命令
+
+```
+unset http_proxy https_proxy
+```
+
+
+
 ## 烧录efuse 
 
 烧录efuse 找林智宇

@@ -22,6 +22,12 @@ git clean
 
 git clean -d -fx:强制删除本地修改代码
 
+git push origin --delete my-branch   release的时候把不需要的仓库push了代码，所以在openlinux删掉这个分支
+
+```
+git push origin --delete buildroot-openlinux-202307-a113
+```
+
 
 
 git工作流程：
@@ -124,7 +130,7 @@ git push review HEAD:refs/for/master
 
 以上便可以将代码快捷纠正push到正确的分支。
 
-# 二、repo 
+# repo 
 
 Repo是谷歌用Python脚本写的调用git的一个脚本。主要是用来下载、管理Android项目的软件仓库（也就是说Repo是用来管理给Git管理的一个个仓库的）
 
@@ -132,7 +138,7 @@ repo是一个基于GIT的工具，它的主要目的是为了管理多个代码�
 
 **repo 是用来管理git仓库的**
 
-## 2.1 管理代码改动都是由 git 完成的，repo 在整个系统中主要担任了什么角色呢？
+## 管理代码改动都是由 git 完成的，repo 在整个系统中主要担任了什么角色呢？
 
 repo 在实际使用中主要担任2个角色：
 
@@ -220,7 +226,7 @@ repo status [PROJECT-LIST]
 ```
 status用于查看多个git库的状态。实际上，是对git status命令的封装。
 
-## 2.2 manifest.xml
+## manifest.xml
 
 一个 repo 所管理的所有项目都记录在这个 .repo/manifest.xml，而这个文件通常是指向 .repo/manifests/default.xml。
 
@@ -239,7 +245,7 @@ status用于查看多个git库的状态。实际上，是对git status命令的�
 指定了 repo 所管理的项目的位置和相应的名字。
 
 
-# 三、gerrit
+# gerrit
 
 gerrit是个基于网页的代码review工具，也是基于GIT的一个工具。GIT本身是个分布式的版本控制工具，Gerrit作为一个强大的review工具的同时，也加强了GIT集中化管理代码的能力
 
