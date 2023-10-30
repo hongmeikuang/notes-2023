@@ -2,11 +2,11 @@
 
 基于A113X2 Soc开发的高端演示套件
 
-# 一、套件介绍
+# 套件介绍
 
 ## 特点
 
-### 1、多输入接口HDMI  
+### 多输入接口HDMI  
 
 输入接口：
 
@@ -24,9 +24,9 @@ AIRPLAY源输入         1
 
 HDMI输出接口（该接口可以支持HDMIARC/eARC功能） 1个
 
-### 2、多声道输出支持。最多支持16声道音频输出。
+### 多声道输出支持。最多支持16声道音频输出。
 
-### 3、Dolby Atmos Home Audio 1.7.2支持。包括如下格式：DD/DDP/TrueHD/MAT。
+### Dolby Atmos Home Audio 1.7.2支持。包括如下格式：DD/DDP/TrueHD/MAT。
 
 ## 组成
 
@@ -62,7 +62,7 @@ D622作为输入接口板和功放驱动板，其作用为：
 
 麦克风板上有7个数字麦克风，通过排线最终连接到A113X2的PDM接口上。
 
-# 二、套件烧录及运行
+# 套件烧录及运行
 
 ### 所需材料
 
@@ -80,7 +80,7 @@ usb 线两根
 
 连接套件的电源接电，开关为on
 
-### 2.1烧录方法
+### 烧录方法
 
 烧录前需要保证接线完整
 
@@ -138,11 +138,11 @@ adnl.exe oem "reset"
 ```
 重启
 
-### 2.2运行
+### 运行
 
 镜像烧录完成后，系统上电后自动运行
 
-### 2.3调试
+### 调试
 
 系统运行日志从AV400的串口输出。串口被A113X2内部集成的CPU、HiFi DSP、AOCPU这3个系统共同使用。串口打印较多，不便于进行命令输入操作。
 
@@ -157,7 +157,7 @@ adb push  1.txt/data:把PC当前目录下的1.txt文件推送到板端的/data�
 
 adb pull /data/1.txt:把板端的/data/1.txt文件拉取到PC当前目录下
 ```
-# 三、网络设置方法
+# 网络设置方法
 
 套件主要使用WiFi的方式进行网络连接。
 
@@ -210,7 +210,7 @@ wpa_cli reconfigure
 ```
 wpa_cli status
 ```
-# 四、AV400功能体验
+# AV400功能体验
 
 ## soudbar软件说明
 
@@ -240,9 +240,9 @@ asplay get-volume 查看当前音量
 
 asplay enable-input XX 切换到某个输入源，XX为某个实际的输入模式，例如HDMI1
 ```
-# 五、测试各种输入模式
+# 测试各种输入模式
 
-## 5.1 HDMI1输入测试
+## HDMI1输入测试
 
 1. 首先确保当前是HDMI1输入模式。可以用 asplay list 命令查看确认。
 
@@ -254,15 +254,15 @@ HDMI1(true)表示当前是HDMI1模式
 3. DVD播放声音，就可以听到声音从D622上连接的喇叭输出。
 
 
-# 六、Soundbar SDK subsystem开发
+# Soundbar SDK subsystem开发
 
 http://10.28.8.24:8080/a113x2/doc_preview/Soundbar%20SDK%20Integration%20Guide%20%280.1%29_CN.pdf
 
-## 6.1 buildroot 开发
+## buildroot 开发
 
 见buildroot学习笔记
 
-## 6.2 bootloader开发
+## bootloader开发
 
 bootloader目录结构
 
@@ -314,7 +314,7 @@ uboot使用的编译器为 aarch64-elf-gcc ,位于`/opt/gcc-linaro-7.3.1-2018.05
 
 编译完成后生成的最终文件u-boot.bin.signed在output/.../image 目录下面
 
-## 6.3kernel 开发
+## kernel 开发
 
 内核源码位于SDK根目录下`kernel/aml-5.4`目录。
 
@@ -374,7 +374,7 @@ adnl reboot
 
 最终生成的boot.img文件在output/.../image目录下
 
-## 6.4 HiFi DSP　开发
+##  HiFi DSP　开发
 
 *只适用于A113X2，A113XD没有DSP模块*
 
@@ -403,9 +403,9 @@ DSP RTOS系统的启动是在板端Linux的 /etc/init.d/S71_load_dspa 脚本中
     # start dsp
     dsp_util -S --dsp hifi4a
 
-## 6.5 NPU 开发
+## NPU 开发
 
-## 6.6 Audio 开发
+## Audio 开发
 
 跟Audio相关的kernel代码有
 
@@ -459,13 +459,13 @@ Soundbar系统里的codec芯片一般较多，用amixer命令逐个调节音量�
     #value range: 0-255
     set-ad82128-volume.sh 200
 
-## 6.7 WIFI/BT
+##  WIFI/BT
 
 WiFi对应有两个网口，wlan0和wlan1，wlan0作为station模式，wlan1作为ap模式。
 
 *注意WiFi模组需要连接天线，否则不能保证无线信号的连接稳定性。*
 
-### 6.7.1 
+### 
 
 #### AP 模式：开发板能够开启热点被手机连接上；
 

@@ -1,4 +1,4 @@
-# 一、 alsa
+#  alsa
 
 一般操作步骤：
 
@@ -120,7 +120,7 @@ buffer = (char *) malloc(size);
 5、最后调用snd_pcm_drain将所有没有挂起的没有传输完的声音样本传输完全，最后关闭该音频流。释放之前动态分配的缓冲区，退出。
 
 
-# 二、ALSA架构
+# ALSA架构
 
 ALSA（Advanced Linux Sound Architecture）即高级 Linux 声音架构。
 
@@ -180,21 +180,21 @@ amixer cset + 接口函数 + 设置值
 
 https://blog.csdn.net/lihuan680680/article/details/121941653
 
-# 三、其他说明
+# 其他说明
 
-## 1.PCM接口
+## PCM接口
 
 最简单的音频接口是PCM（脉冲编码调制）接口，该接口由时钟脉冲（BCLK）、帧同步信号（FS）及接收数据（DR）和发送数据（DX）组成。
 
 在FS信号的上升沿数据传输从MSB开始，FS频率等于采样频率。FS信号之后开始数据字的传输，单个数据位按顺序进行传输，一个时钟周期传输一个数据字。PCM接口很容易实现，原则上能够支持任何数据方案和任何采样频率，但需要每个音频通道获得一个独立的数据队列。
 
-## 2.IIS接口
+## IIS接口
 
 IIS接口在20世纪80年代首先被PHILIPS用于消费音频产品，并在一个称为LRCLK（Left/Right CLOCK）的信号机制中经过转换，将两路音频变成单一的数据队列。当LRCLK为高时，左声道数据被传输；LRCLK为低时，右声道数据被传输。
 
 与PCM相比，IIS更适合于立体声系统，当然，IIS的变体也支持多通道的时分复用，因此可以支持多通道
 
-## 3. Linux ALSA 音频设备驱动
+## Linux ALSA 音频设备驱动
 
 ALSA系统包括包括驱动包`alsa-driver`、开发包alsa-libs、开发包插件alsa-libplugins、设置管理工具包alsa-utils、其他声音相关处理小程序包alsa-tools、特殊音频固件支持包alsa-firmware、OSS接口兼容模拟层工具alsa-oss供7个子项目，其中只有驱动包是必需的。
 
@@ -216,7 +216,7 @@ ALSA系统包括包括驱动包`alsa-driver`、开发包alsa-libs、开发包插
 
 *这些接口被提供给alsa-lib使用，而不是给应用程序使用，应用程序最好使用alsa-lib，或者更高级的接口比如jack提供的接口。*
 
-## 4.linux ASoC音频设备驱动
+## linux ASoC音频设备驱动
 
 ASoC是ALSA在SoC方面的发展和演变，它的本质仍然属于ALSA，但是在ALSA架构基础上对CPU相关的代码和Codec相关的代码进行了分离，其原因是采用传统ALSA架构情况下，同一型号的Codec工作于不同的CPU时，需要不同的驱动，这是不符合代码重用的要求的。
 
@@ -229,7 +229,7 @@ ASoC主要由3部分组成：
 
 以上3部分中，1和2基本都可以仍然是通用的驱动了，即Codec驱动认为自己可以连接任意CPU，而CPU的IIS、PCM、或AC’97接口对应的平台驱动则认为自己可以连接符号其接口类型的Codec，只有3是不通用的，由特定的电路板上具体的CPU和Codec确定，因此它很像一个插座，上面插着Codec和平台这两个插头。ASoC的用户空间编程方法与ALSA完全一致。
 
-# 四、ALSA lib 基本概念
+# ALSA lib 基本概念
 
 1、channael
 
@@ -284,7 +284,7 @@ xrun指的是，声卡period一到，引发一个中断，告诉alsa驱动，要
 也可以通过设置silence threshold，当空余空间超过silence threshold时，就hardware buffer 写入silence.
 
 
-# 五、音频框架总结
+# 音频框架总结
 
 (1).ALSA是 kernel里面管理 audio 的核心，我们的 audio driver部分一般会调用snd_soc_register_card(), 将我们在软件层面抽象出来的声卡注册进audio核心
 

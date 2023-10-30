@@ -272,7 +272,7 @@ export TARGET_CFLAGS='-mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9'
 ## S420 的提交记录
 https://scgit.amlogic.com/#/c/74124/6
 
-## MRMapp 运行命令
+## MRM app 运行命令
 
 ```
 export LD_LIBRARY_PATH=/usr/lib/avs/

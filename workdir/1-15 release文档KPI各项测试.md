@@ -11,4 +11,6 @@ https://jira.amlogic.com/browse/SWPL-130881
 
 kernel and ramdisk  -----》boot.img
 
-kernel and recovery ramdisk --------》rootfs.squashfs
+kernel and recovery ramdisk --------》recovery.img
+
+system-》rootfs.squashfs

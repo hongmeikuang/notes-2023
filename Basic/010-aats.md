@@ -26,6 +26,8 @@ AMLA113X2AV400001       device
 ### 在AV400上通过串口单独测试Post_Test_Check模块
 ```
 ./aats_linux_cmd -p A113X2_AV400_a6432bit_DailyBuild.yml -m Post_Test_Check -s /dev/AV400_connector -d AMLA113X2AV400001 -U 921600
+
+./aats_linux_cmd -p A113L_AD403_SPK_K515_a32bit_DailyBuild.yml -m Post_Test_Check -s /dev/AD403_connector -d AMLA113LAD403001 -U 115200
 ```
 ### 在AV400上通过串口单独测试Basic_Test模块的Basic_Test子模块
 ```
@@ -44,6 +46,7 @@ AMLA113X2AV400001       device
 ```
 minicom -D /dev/AV400_connector -b 921600 
 minicom -D /dev/BA400_connector -b 921600 
+minicom -D /dev/AD403_connector -b 115200
 
 echo none > /sys/kernel/config/usb_gadget/amlogic/UDC
 echo fdd00000.crgudc2 > /sys/kernel/config/usb_gadget/amlogic/UDC
@@ -104,6 +107,7 @@ https://confluence.amlogic.com/display/SW/AutoTest+Platform+Register
 
 ```
 keyman write usid str AMLA113X2AV400001
+keyman write usid str AMLA113LAD403001
 ```
 
 用adb devices命令可以查看
@@ -222,6 +226,20 @@ av400_on/off的命令是在~/.bash_profile文件中写的
 
 ```
 source ~/.bash_profile
+```
+
+## 搭建AD403
+
+```
+ls /dev/ttyUSB
+ttyUSB0  ttyUSB1  ttyUSB2  ttyUSB3  ttyUSB4  ttyUSB5  
+```
+
+ttyUSB4是继电器，ttyUSB5是串口
+
+```
+sudo ln -s /dev/ttyUSB4 /dev/AD403_powerRelay
+sudo ln -s /dev/ttyUSB5 /dev/AD403_connector
 ```
 
 

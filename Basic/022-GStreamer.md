@@ -3422,4 +3422,284 @@ $ dot 0.00.00.170999259-gst-launch.PAUSED_PLAYING.dot -Tpng -o play.png
 
 **需要注意的是，如果需要在自己的应用中加入此功能，那就需要在想要生成dot文件的时候显式地在相应事件发生时调用[GST_DEBUG_BIN_TO_DOT_FILE](https://developer.gnome.org/gstreamer/stable/gstreamer-GstInfo.html#GST-DEBUG-BIN-TO-DOT-FILE:CAPS)() 或[GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS](https://developer.gnome.org/gstreamer/stable/gstreamer-GstInfo.html#GST-DEBUG-BIN-TO-DOT-FILE-WITH-TS:CAPS)()，否则即使设置了GST_DEBUG_DUMP_DOT_DIR 环境变量也无法生成dot文件。**
 
- 
+ # gstreamer 注意事项
+
+## 将播放在线音视频替换为播放本地文件
+
+```
+g_object_set (data.source, "uri", "https://www.freedesktop.org/software/gstreamer-sdk/data/media/sintel_trailer-480p.webm", NULL);
+
+g_object_set (data.source, "uri", "file:///data/pfzl.wav", NULL);
+```
+
+注意，本地文件的路径应该写为`file://+文件绝对路径`的方式，否则运行时会有错误。
+
+## 例子
+
+```
+#include <unistd.h>
+#include <stdio.h>
+#include <getopt.h>
+#include <gst/gst.h>
+
+
+typedef struct {
+    // GstElement *playbin;
+    GMainLoop *main_loop;
+    char *uri;
+    char *license_url;
+    char *proxy;
+    int key_type;
+    gint64 pos;
+    GstElement *pipeline;
+    GstElement *source;
+    GstElement *decode;
+    GstElement *wlcdmi;
+    GstElement *convert;
+    GstElement *resample;
+    GstElement *sink;
+    GstPad *srcpad;
+} Context;
+static void pad_added_handler (GstElement *decode, GstPad *new_pad, Context *data);
+static void on_child_added(GstChildProxy *child_proxy, GObject *object, gchar *name, Context *data);
+
+static void on_child_added(GstChildProxy *child_proxy, GObject *object, gchar *name, Context *data) {
+    GstElement *decoder = GST_ELEMENT(object);
+    GstElementFactory *f = gst_element_get_factory(decoder);
+    g_print("element' name %s .\n",GST_OBJECT_NAME (f));
+
+    if (g_strcmp0(GST_OBJECT_NAME(f),"wlcdmi") == 0) {
+        if (data->license_url) {
+            GValue value = G_VALUE_INIT;
+            g_printerr("set license url %s\n", data->license_url);
+            g_value_init(&value, G_TYPE_STRING);
+            g_value_set_string(&value, data->license_url);
+            g_object_set_property(G_OBJECT(decoder), "license-url", &value);
+            g_value_unset(&value);
+        }
+        if (data->proxy) {
+            GValue value = G_VALUE_INIT;
+            g_printerr("set proxy %s\n", data->proxy);
+            g_value_init(&value, G_TYPE_STRING);
+            g_value_set_string(&value, data->proxy);
+            g_object_set_property(G_OBJECT(decoder), "proxy", &value);
+            g_value_unset (&value);
+        }
+        if (data->key_type) {
+            GValue value = G_VALUE_INIT;
+            g_printerr("set key_type %d\n", data->key_type);
+            g_value_init(&value, G_TYPE_UINT);
+            g_value_set_uint(&value, data->key_type);
+            g_object_set_property(G_OBJECT(decoder), "key-type", &value);
+            g_value_unset(&value);
+        }
+    }
+}
+
+/* This function will be called by the pad-added signal */
+static void pad_added_handler (GstElement *decode, GstPad *new_pad, Context *data) {
+//   GstPad *sink_pad = gst_element_get_request_pad(data->multiqueue, "sink_0");
+    GstPad *sink_pad = gst_element_get_static_pad (data->convert, "sink");
+  GstPadLinkReturn ret;
+  GstCaps *new_pad_caps = NULL;
+  GstStructure *new_pad_struct = NULL;
+  const gchar *new_pad_type = NULL;
+  GstCaps *sink_pad_caps = NULL;
+
+  g_print ("Received new pad '%s' from '%s':\n", GST_PAD_NAME (new_pad), GST_ELEMENT_NAME (decode));
+
+  /* If our converter is already linked, we have nothing to do here */
+  if (gst_pad_is_linked (sink_pad)) {
+    g_print ("We are already linked. Ignoring.\n");
+    goto exit;
+  }
+
+  /* Check the new pad's type */
+  new_pad_caps = gst_pad_get_current_caps (new_pad);
+  const gchar *pad_type = gst_caps_to_string(new_pad_caps);
+  g_print("new Pad type: %s\n", pad_type);
+
+  new_pad_struct = gst_caps_get_structure (new_pad_caps, 0);
+  new_pad_type = gst_structure_get_name (new_pad_struct);
+  if (!g_str_has_prefix (new_pad_type, "audio/x-raw")) {
+    g_print ("Received new pad type '%s'.\n", new_pad_type);
+    goto exit;
+  }
+
+  /* Attempt the link */
+  ret = gst_pad_link (new_pad, sink_pad);
+  if (GST_PAD_LINK_FAILED (ret)) {
+    g_print ("Type is '%s' but link failed.\n", new_pad_type);
+  } else {
+    g_print ("Link succeeded (type '%s').\n", new_pad_type);
+  }
+
+exit:
+  /* Unreference the new pad's caps, if we got them */
+  if (new_pad_caps != NULL)
+    gst_caps_unref (new_pad_caps);
+  if (sink_pad_caps != NULL) {
+    gst_caps_unref (sink_pad_caps);
+  }
+
+  /* Unreference the sink pad */
+  gst_object_unref (sink_pad);
+}
+
+
+static void handle_message (GstBus *bus, GstMessage *msg, Context *data)
+{
+    switch (GST_MESSAGE_TYPE (msg)) {
+    case GST_MESSAGE_ASYNC_DONE:
+        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS (GST_BIN (data->pipeline),GST_DEBUG_GRAPH_SHOW_ALL, "gst-play.async-done");
+        break;
+    case GST_MESSAGE_ERROR:
+        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS (GST_BIN (data->pipeline),GST_DEBUG_GRAPH_SHOW_ALL, "gst-play.error");
+        g_main_loop_quit (data->main_loop);
+        break;
+    case GST_MESSAGE_EOS:
+        GST_INFO("EOS");
+        g_main_loop_quit (data->main_loop);
+        break;
+    default:
+        break;
+    }
+}
+
+static gboolean playback_timer (gpointer user_data)
+{
+    Context *data = user_data;
+
+    gst_element_query_position (data->pipeline, GST_FORMAT_TIME, &data->pos);
+    return TRUE;
+}
+
+int playback(Context *data)
+{
+    int ret = -1;
+    GstStateChangeReturn res;
+    guint watcher = 0;
+    guint timer = 0;
+
+    data->pos = GST_CLOCK_TIME_NONE;
+    data->pipeline = gst_pipeline_new ("test-pipeline");
+
+    data->source = gst_element_factory_make ("souphttpsrc", "source");
+    // data->source = gst_element_factory_make ("filesrc", "source");
+    data->decode = gst_element_factory_make ("decodebin", "decode");
+
+    // data->wlcdmi = gst_element_factory_make ("wlcdmi", "wlcdmi");
+    data->convert = gst_element_factory_make ("audioconvert", "convert");
+    data->resample = gst_element_factory_make ("audioresample", "resample");
+    data->sink = gst_element_factory_make ("autoaudiosink", "sink");
+    if (!data->pipeline || \
+        !data->source || \
+        !data->decode || \
+        !data->convert || \
+        !data->resample || \
+        !data->sink) {
+      g_printerr ("Not all elements could be created.\n");
+      return -1;
+    }
+
+    gst_bin_add_many (data->pipeline, data->source,data->decode, data->convert, data->resample, data->sink,data->wlcdmi);
+
+    if (!gst_element_link(data->source, data->decode)) {
+        g_printerr ("111 Elements could not be linked.\n");
+    }
+
+    if (!gst_element_link(data->convert, data->resample)) {
+        g_printerr ("000 Elements could not be linked.\n");
+    }
+    if (!gst_element_link(data->resample, data->sink)) {
+        g_printerr ("1100 Elements could not be linked.\n");
+    }
+
+    /* Set the URI to play */
+    // g_object_set (data->source, "uri", "https://gstreamer.freedesktop.org/data/media/sintel_trailer-480p.webm", NULL);
+    g_object_set (data->source, "location", data->uri, NULL);
+    g_signal_connect (data->decode, "pad-added", (GCallback)pad_added_handler, data);
+    g_signal_connect(G_OBJECT(data->decode), "child-added", G_CALLBACK(on_child_added), data);
+
+    watcher = gst_bus_add_watch (GST_ELEMENT_BUS (data->pipeline), (GstBusFunc)handle_message, data);
+    res = gst_element_set_state(data->pipeline, GST_STATE_PLAYING);
+    if (res == GST_STATE_CHANGE_FAILURE) {
+        g_printerr("playback failed");
+        gst_object_unref(data->pipeline);
+        goto exit;
+    }
+
+    data->main_loop = g_main_loop_new (NULL, FALSE);
+    timer = g_timeout_add (100, playback_timer, data);
+    g_main_loop_run (data->main_loop);
+    ret = 0;
+
+exit:
+    if (data->main_loop) {
+        g_main_loop_unref(data->main_loop);
+        data->main_loop = NULL;
+    }
+    if (data->pipeline) {
+        gst_element_set_state(data->pipeline, GST_STATE_NULL);
+        g_source_remove(watcher);
+        gst_object_unref(data->pipeline);
+        data->pipeline = NULL;
+    }
+    if (timer)
+        g_source_remove(timer);
+    return ret;
+}
+
+int main(int argc, char *argv[])
+{
+    Context data = {0};
+    int opt;
+    int endurance_test = 0;
+
+    gst_init (&argc, &argv);
+
+    for (int i = 0; i < argc; i++) {
+        g_printerr("%s\n", argv[i]);
+    }
+    while ((opt = getopt(argc, argv, "l:p:t:e")) != -1) {
+        switch (opt) {
+        case 'l':
+            data.license_url = optarg;
+            break;
+        case 'p':
+            data.proxy = optarg;
+            break;
+        case 't':
+            data.key_type = atoi(optarg);
+            break;
+        case 'e':
+            endurance_test = 1;
+            break;
+        case '?':
+        default:
+            g_printerr("Usage: %s [-e] [-l license_server] [-p proxy] [-t key_type] uri\n", argv[0]);
+            exit(EXIT_FAILURE);
+        }
+    }
+    if (optind == argc) {
+        g_printerr("No file to play\n");
+        exit(EXIT_FAILURE);
+    } else {
+        data.uri = argv[optind];
+    }
+
+    do {
+        data.pos = 0;
+        playback(&data);
+        if (GST_CLOCK_TIME_IS_VALID(data.pos)) {
+            gst_print("played %llu.%09llu\n", data.pos / GST_SECOND, data.pos % GST_SECOND);
+        } else {
+            gst_print("played 0\n");
+        }
+    } while(endurance_test);
+
+    return 0;
+}
+
+```
+

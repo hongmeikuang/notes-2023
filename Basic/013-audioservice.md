@@ -71,7 +71,7 @@ endif
 
 4 这就是AV400_SBR_ENABLE宏的传递过程。
 
-# 一、soundbar system 
+# soundbar system 
 
 http://10.28.8.24:8080/a113x2/doc_preview/Soundbar%20SDK%20Integration%20Guide%20%280.1%29_CN.pdf
 
@@ -146,7 +146,7 @@ homeapp是客户端应用程序，它使用 as_client API 来访问音频服务�
 
 比如，avs_client.c主要与AVS进程进行交互，控制AVS的音量和播放状态。在avs_client.c 中包含AvsClient.h头文件（这个文件在AVS-SDK/Client/目录下），然后实现对avs的音量和播放状态的控制。
 
-# 二、声道切换配置
+# 声道切换配置
 
 当前系统默认是使用7.1.4声道的配置。
 
@@ -181,7 +181,7 @@ homeapp是客户端应用程序，它使用 as_client API 来访问音频服务�
 
 3.重新烧录镜像
 
-# 三、适配codec芯片
+# 适配codec芯片
 
 当前D622上使用的是AD82128 codec芯片，下面以AD82128为例说明如何适配codec芯片。
 
@@ -374,9 +374,9 @@ adb push av400_sbr_7_1_4_datmos_V1_7.conf /etc/default_audioservice.conf
 asplay set-volume 80
 ```
 
-# 四、调试
+# 调试
 
-## 4.1 halaudio 日志级别：
+## halaudio 日志级别：
 ```
 #define LEVEL_VERBOSE   0
 #define LEVEL_INFO      1
@@ -434,7 +434,7 @@ echo "AML_AUDIO_DUMP_FILE=dump_input=1" >/tmp/AML_AUDIO_DEBUG
 ```
 音频数据位于`/data/audio/input.data`，其格式为2ch + S16_LE + 采样率，这些数据来自HDMI Input。
 
-### 4.2.1.2 output data
+### output data
 ```
 mkdir -p /data/audio/
 chmod 777 /data/audio/ -R
@@ -442,7 +442,7 @@ echo "AML_AUDIO_DUMP_FILE=dump_output=1" >/tmp/AML_AUDIO_DEBUGG
 ```
 音频数据位于`/data/audio/output.pcm`，是12ch + S32_LE + 48K，这些数据输出到AlSA接口。
 
-### 4.2.1.3 ATMOS data
+###  ATMOS data
 
 ```
 mkdir -p /data/audio/
@@ -451,7 +451,7 @@ echo "AML_AUDIO_DUMP_FILE=dump_decoder=1" >/tmp/AML_AUDIO_DEBUG
 ```
 音频数据位于`/data/audio/datmos_raw_in.data`和`/data/audio/datmos_pcm_out.data`，datmos_raw_in.data是ATMOS解码前的输入音频数据。datmos_pcm_out.data是ATMOS解码的音频数据。
 
-## 4.3 audioservice 或homeapp 日志级别
+## audioservice 或homeapp 日志级别
 { "LOG_QUIET", "LOG_ERR", "LOG_WARNING", "LOG_INFO","LOG_DEBUG", "LOG_VERBOSE", NULL }
 
 ```
@@ -461,7 +461,7 @@ echo "all:LOG_DEBUG" > /tmp/AML_LOG_audioservice
 echo "all:LOG_DEBUG" > /tmp/AML_LOG_homeapp  
 //打开homeapp 的日志
 ```
-## 4.4 audioservice 调试
+##  audioservice 调试
 
 打开调试日志开关，在板端执行下面命令，即可打开audioservice和homeapp的DEBUG级别的日志打
 印。修改立刻生效，不需要重启audioservice和homeapp进程。
@@ -502,11 +502,11 @@ adb shell sync
 ```
 /etc/init.d/S90audioservice restart
 ```
-### 4.4.1 homeapp 与audioservice的 DBus通信协议
+### homeapp 与audioservice的 DBus通信协议
 
 DBus通信协议描述是在`$SDK/vendor/amlogic/audioservice/src/aml.linux.dbus.xml`文件中。
 audioservice作为DBus Server，homeapp和asplay都是DBus Client。
-#### 4.4.1.1 xml生成C code
+####  xml生成C code
 DBus协议是用aml.linux.dbus.xml这个xml文件描述的，audioservice和homeapp里不能直接使用，需要在编译时使用 gdbus-codegen 工具生成 audioservice_gdbus.c audioservice_gdbus.h 。
 
 这个过程是在 $SDK/vendor/amlogic/audioservice/src/Makefile.am 中完成的。
@@ -514,7 +514,7 @@ DBus协议是用aml.linux.dbus.xml这个xml文件描述的，audioservice和home
 audioservice_gdbus.c audioservice_gdbus.h : aml.linux.dbus.xml gdbus-codegen --interface-prefix=aml.linux.dbus --generate-c- code=audioservice_gdbus $<
 ```
 
-### 4.4.2 audioservice编译脚本描述
+### audioservice编译脚本描述
 audioservice使用autotools来编译代码。
 
 下面描述的文件以 $SDK/vendor/amlogic/audioservice 作为根目录。
@@ -529,7 +529,7 @@ homeapp/Makefile.am ：使用configure.ac传递过来的变量控制编译哪些
 ```
 
 
-### 4.4.3 homeapp调试
+### homeapp调试
 
 homeapp的代码在 $SDK/vendor/amlogic/audioservice/homeapp 目录下。
 homeapp的代码包括：
@@ -558,7 +558,7 @@ asplay enable-input AVS
 
 /etc/init.d/avs_mdns.sh： 启动mdns服务，方便手机APP发现设备并进行配置。
 
-# 五、用户添加player client 
+# 用户添加player client 
 
 操作步骤：
 
